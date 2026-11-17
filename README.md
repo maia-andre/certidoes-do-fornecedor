@@ -44,7 +44,7 @@ Sete certidões em sequência, numa só tela, com o estado de cada uma atualizad
 | 2 | CRF FGTS | Caixa | Navegador do servidor | sim | Situação (Regular) e validade |
 | 3 | CNDT | TST | Automatizado | imagem | Situação e validade |
 | 5 | Falência, concordatas e recuperações | e-SAJ/TJSP | Automatizado | reCAPTCHA | "Nada consta" e data de emissão, ou "Pedido feito: acompanhar" |
-| 7 | Sanções: CEIS, CNEP e inidôneos do TCU | Consulta Consolidada (TCU) | Consulta direta | nenhum | Resultado de cada cadastro e data da consulta |
+| 7 | Sanções: CEIS, CNEP e inidôneos do TCU | Consulta Consolidada (TCU) | Navegador do servidor | nenhum | Resultado de cada cadastro e data da consulta |
 | 10 | Improbidade administrativa (CNIA) | CNJ | Consulta direta | nenhum | "Nada consta" e data da consulta |
 | 8 | Apenados do TCE-SP | Sistema de Apenados (TCE-SP) | Navegador do servidor | Turnstile | "Nada consta" e data da consulta |
 
@@ -67,31 +67,31 @@ Cada portal aceita um tipo de acesso diferente. O programa usa um de três modos
 
 ```mermaid
 flowchart TB
-    subgraph D["Consulta direta · TCU, CNJ"]
+    subgraph D["Consulta direta · CNJ"]
         D1[Programa pede o PDF<br/>à API pública] --> D2[PDF salvo,<br/>sem ação do servidor]
     end
     subgraph A["Automatizado · TST, e-SAJ"]
         A1[Programa abre um Chromium<br/>e preenche o CNPJ] --> A2[Servidor resolve<br/>o captcha] --> A3[Programa recebe<br/>o PDF]
     end
-    subgraph N["Navegador do servidor · Receita, Caixa, TCE-SP"]
+    subgraph N["Navegador do servidor · Receita, Caixa, TCU, TCE-SP"]
         N1[Programa abre o portal<br/>e copia o CNPJ] --> N2[Servidor cola, resolve<br/>o captcha e baixa] --> N3[Programa recolhe o PDF<br/>da pasta Downloads]
     end
 ```
 
 | Modo | Quando usamos | Portais |
 |---|---|---|
-| **Consulta direta** | O portal é público, não tem captcha e entrega o PDF por endereço próprio. O programa se identifica de forma genérica, sem dados do usuário. | TCU, CNJ |
+| **Consulta direta** | O portal é público, não tem captcha e entrega o PDF por endereço próprio. O programa se identifica de forma genérica, sem dados do usuário. | CNJ |
 | **Automatizado** | O portal aceita navegador automatizado. O programa abre um Chromium visível, preenche o formulário e espera o servidor resolver o captcha. | TST, e-SAJ |
-| **Navegador do servidor** | O portal recusa navegador automatizado. O programa abre o portal no navegador normal do servidor e reconhece o PDF baixado pelo nome ou pelo texto e pelo CNPJ. | Receita, Caixa, TCE-SP |
+| **Navegador do servidor** | O portal recusa navegador automatizado. O programa abre o portal no navegador normal do servidor e reconhece o PDF baixado pelo nome ou pelo texto e pelo CNPJ. | Receita, Caixa, TCU, TCE-SP |
 
 <details>
-<summary><b>Por que cada portal está no seu modo</b> (testes de 11 e 12/11/2026)</summary>
+<summary><b>Por que cada portal está no seu modo</b> (testes de 11, 12 e 17/11/2026)</summary>
 
 - **Receita Federal:** o hCaptcha passa no Chromium automatizado, mas a API responde `CaptchaFalhaValidacao` (código 023). No navegador normal, funciona.
 - **Caixa:** o bloqueio de robôs (Radware/ShieldSquare) barrou o primeiro acesso automatizado. Não fazemos novos acessos automatizados, porque a página de bloqueio registra o IP da rede.
 - **TCE-SP:** o Cloudflare Turnstile falhou com o erro 600010 nas duas tentativas no Chromium automatizado. No navegador normal, funciona.
 - **TST e e-SAJ:** aceitam o Chromium do Playwright. No e-SAJ, o programa preenche o pedido; o servidor confere, resolve o reCAPTCHA e envia. Logo depois, o programa consulta o pedido e baixa a certidão, que costuma sair na hora quando nada consta.
-- **TCU:** a página da Consulta Consolidada busca o PDF numa API pública, sem captcha. O programa pede o PDF direto, sem abrir navegador.
+- **TCU:** a Consulta Consolidada não tem captcha, mas em 17/11/2026 o firewall do TCU passou a recusar a consulta direta pela API pública ("Requisição rejeitada"). No navegador normal, funciona.
 - **CNJ:** a consulta de improbidade não tem mais captcha. O programa faz a mesma verificação de condenações que a página faz e baixa a certidão. Virou item próprio porque o TCU respondeu "Sistema do CNJ está indisponível" em todas as 20 consultas da validação, enquanto o site do CNJ funcionava.
 - **Portal da Transparência:** não é usado. CEIS e CNEP vêm pelo TCU, porque o portal da CGU pede captcha (AWS WAF).
 
@@ -138,7 +138,25 @@ O que falta, o que impede e um caminho possível para cada exigência. Nenhum de
 
 ## Como rodar
 
-### Windows (plataforma principal)
+### Executável para Windows
+
+Para usar o programa sem instalar Python nem git:
+
+1. Baixe o zip `certidoes-do-fornecedor-<versão>-windows.zip` da [release mais recente](https://github.com/maia-andre/licita_certidoes/releases/latest).
+2. Extraia a pasta `Certidoes do Fornecedor` onde preferir, por exemplo em Documentos.
+3. Abra `Certidoes do Fornecedor.exe`.
+
+O Chromium usado nos portais já vem dentro da pasta. As certidões ficam em `Certidoes`, na pasta do usuário.
+
+Para montar o pacote a partir do código, com o ambiente da seção abaixo:
+
+```powershell
+.venv\Scripts\python empacotar.py
+```
+
+A pasta e o zip ficam em `dist\`.
+
+### Windows, pelo código-fonte
 
 Testado no Windows 11 com Python 3.14. A tela usa o WebView2 do Edge, que já vem com o sistema.
 

@@ -37,3 +37,7 @@ screenshots/
 .idea/
 .DS_Store
 *.pyc
+
+# Empacotamento (empacotar.py)
+build/
+dist/

@@ -1,6 +1,6 @@
 # Plan: Obtenção assistida de certidões de fornecedores
-Spec: docs/spec.md, versão 1.14 | Gerado: 2026-11-06
-Progresso: 12/15 incrementos concluídos (3 adiados)
+Spec: docs/spec.md, versão 1.16 | Gerado: 2026-11-06
+Progresso: 13/16 incrementos concluídos (3 adiados)
 
 ## Backlog
 
@@ -94,8 +94,14 @@ Itens da spec: Definição de concluído
 Depende de: INC-12 (INC-09 e INC-13 adiados)
 Entrega verificável: um relatório mostra o resultado de 10 CNPJs reais, nos itens ativos da RN-01 (1, 2, 3, 5, 7, 8 e 10), incluindo ao menos 1 filial e 1 CNPJ de outra UF, conferido com os PDFs.
 
+### INC-16 — Executável para Windows
+Status: concluído (2026-11-17)
+Itens da spec: RNF-07
+Depende de: INC-10
+Entrega verificável: num Windows sem Python, o servidor extrai o zip, abre `Certidoes do Fornecedor.exe` e faz uma consulta completa, com o Chromium do pacote e a capa em PDF.
+
 ## Cobertura
-Cada REQ, RNF, RN e CE da spec aparece em exatamente um incremento: REQ-01 a REQ-21, RNF-01 a RNF-06, RN-01 a RN-09 e RN-11, e CE-01 a CE-15. A RN-10 registra os adiamentos e a RN-12, o mapeamento colaborativo; nenhuma das duas tem incremento próprio.
+Cada REQ, RNF, RN e CE da spec aparece em exatamente um incremento: REQ-01 a REQ-21, RNF-01 a RNF-07, RN-01 a RN-09 e RN-11, e CE-01 a CE-15. A RN-10 registra os adiamentos e a RN-12, o mapeamento colaborativo; nenhuma das duas tem incremento próprio.
 
 O INC-02 antecipa o maior risco técnico (hCaptcha em navegador automatizado). Se a Receita ou a Caixa recusarem o navegador, o plano deve ser revisto antes de seguir.
 
@@ -133,3 +139,5 @@ O INC-02 antecipa o maior risco técnico (hCaptcha em navegador automatizado). S
 - **2026-11-12 — Licença AGPL 3.0.** O código pertence ao Município (art. 4º da Lei 9.609/1998) e foi publicado sob a AGPL 3.0, com o aviso de copyright em nome do Município e o autor creditado no README. A escolha garante que versões modificadas, distribuídas ou oferecidas pela rede, continuem abertas. A tela ganhou um rodapé com a licença e o endereço do código (spec 1.11).
 - **2026-11-12 — CNPJ de qualquer UF.** O projeto vai ser oferecido a outros municípios, e a regra "só CNPJ de SP" deixou de valer (spec 1.10). O REQ-04 do INC-05 foi revisto: o programa atende qualquer UF, e o item cujo portal só atende uma UF fica "Não se aplica" fora dela, sem abrir o portal. Hoje, só a falência pelo e-SAJ depende da UF; o TCE-SP vale para qualquer fornecedor, porque a consulta é exigida pelo órgão contratante de SP. As CNDs estaduais e municipais de outras UFs e municípios passam a vir do mapeamento colaborativo, pelas issues do repositório (RN-12).
 - **2026-11-12 — TCU sem navegador.** A página do TCU busca o resultado e o PDF numa API pública (`/api/rest/publico/certidoes/<CNPJ>`, com `Accept: application/pdf`). Pedir o PDF direto, sem Chromium, é mais simples e leve. Novo modo "consulta direta" na RN-09. No Windows da prefeitura, a consulta passa pelo proxy configurado no sistema, como a da BrasilAPI.
+- **2026-11-17 — Executável para Windows (INC-16).** O executável entrou no escopo (spec 1.15, RNF-07): `empacotar.py` monta com o PyInstaller a pasta `Certidoes do Fornecedor`, com o Chromium do Playwright dentro do pacote, e o zip para a release. Teste assistido com um CNPJ real: as 7 certidões e a capa saíram pelo executável.
+- **2026-11-17 — TCU no navegador do servidor.** No primeiro teste do executável, o firewall do TCU recusou a consulta direta ("Requisição rejeitada", suporte ID extB); o mesmo pedido fora do executável teve a mesma resposta, e a página abriu normalmente no navegador do servidor. O item 7 passou ao modo navegador do servidor, com o PDF reconhecido pelo texto e pelo CNPJ (spec 1.16).
