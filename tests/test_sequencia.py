@@ -24,7 +24,7 @@ def obtem(caminho):
 def test_itens_seguem_a_ordem_da_rn01_com_o_modo_de_cada_portal():
     assert [(i.chave, i.modo) for i in seq.ITENS] == [
         ("cnd", seq.NAVEGADOR), ("crf", seq.NAVEGADOR), ("cndt", seq.AUTOMATIZADO), ("falencia", seq.AUTOMATIZADO),
-        ("sancoes", seq.DIRETO), ("improbidade", seq.DIRETO), ("apenados", seq.NAVEGADOR)]
+        ("sancoes", seq.NAVEGADOR), ("improbidade", seq.DIRETO), ("apenados", seq.NAVEGADOR)]
 
 
 def test_sancoes_vem_do_tcu_sem_dados_extras():

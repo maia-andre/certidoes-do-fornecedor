@@ -239,15 +239,6 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             self._html(ESAJ_CONSULTA.format(acao="/sco/realizarDownload.do", alvo="_blank"))
         elif url.path == "/esaj-consulta-pendente":
             self._html(ESAJ_CONSULTA.format(acao="/esaj-pendente", alvo="_self"))
-        elif url.path.startswith(("/tcu/", "/tcu-erro/", "/tcu-html/")):
-            self.server.tcu.append({"caminho": url.path, "accept": self.headers.get("Accept"),
-                                    "agente": self.headers.get("User-Agent")})
-            if url.path.startswith("/tcu-erro/"):
-                self.send_error(503)
-            elif url.path.startswith("/tcu-html/") or self.headers.get("Accept") != "application/pdf":
-                self._html("<html><body>Certidões APF</body></html>")
-            else:
-                self._anexo(pdf_com_texto(*TCU_CONSULTA))
         elif url.path.startswith(("/cnj/", "/cnj-registros/", "/cnj-estranho/")) and url.path.endswith("/certidao.php"):
             consulta = dict(urllib.parse.parse_qsl(url.query))
             self.server.cnj.append({"certidao": consulta, "agente": self.headers.get("User-Agent")})
@@ -298,7 +289,6 @@ def portal():
     servidor = http.server.ThreadingHTTPServer(("127.0.0.1", 0), _Handler)
     servidor.registro = None
     servidor.consultas = []
-    servidor.tcu = []
     servidor.cnj = []
     thread = threading.Thread(target=servidor.serve_forever, daemon=True)
     thread.start()

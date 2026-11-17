@@ -28,7 +28,7 @@ FORMATO_HORA = "%d/%m/%Y %H:%M:%S"
 # Modos de acesso (RN-09)
 AUTOMATIZADO = "automatizado"
 NAVEGADOR = "navegador"
-DIRETO = "direto"  # consulta direta ao portal, sem navegador e sem captcha (TCU)
+DIRETO = "direto"  # consulta direta ao portal, sem navegador e sem captcha (CNJ)
 
 LIMITE_MENSAGEM = 1000
 
@@ -67,7 +67,7 @@ ITENS = (
          esaj.INSTRUCAO, AUTOMATIZADO, leitura.ler_falencia, precisa=("razao_social", "email", "avisar"), uf="SP",
          fora_da_uf="CNPJ de {uf}: o e-SAJ do TJSP não emite esta certidão. Peça-a ao distribuidor do Tribunal de "
                     "Justiça da sede (art. 69, II, da Lei 14.133/2021)."),
-    Item("sancoes", "Sanções: TCU, CEIS e CNEP", "TCU", tcu.obter_consulta, tcu.INSTRUCAO, DIRETO,
+    Item("sancoes", "Sanções: TCU, CEIS e CNEP", "TCU", tcu.obter_consulta, tcu.INSTRUCAO, NAVEGADOR,
          leitura.ler_sancoes_tcu),
     Item("improbidade", "Improbidade (CNJ)", "CNJ", cnj.obter_certidao, cnj.INSTRUCAO, DIRETO,
          leitura.ler_improbidade_cnj),
