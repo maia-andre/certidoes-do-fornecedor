@@ -207,7 +207,7 @@ As notas de cada versão estão em [Releases](https://github.com/maia-andre/lici
 | **v0.1.0** · Fluxo básico | 11/11/2026 | CND federal, CRF e CNDT em sequência; leitura de situação e validade; identificação pela BrasilAPI; pular e repetir |
 | **v0.2.0** · Certidões das minutas | 12/11/2026 | Falência no e-SAJ, sanções pelo TCU e apenados do TCE-SP |
 | **v0.3.0** · Validada, com tela nova e capa | 12/11/2026 | Validação com 10 CNPJs reais e correções; improbidade no CNJ; CNPJ de qualquer UF; CND de filial pela matriz; tela revisada; subpasta por consulta e capa em PDF |
-| **v1.0.0** *(planejada)* | — | Instalação sem Python (executável para Windows) |
+| **v1.0.0** · Executável para Windows | 17/11/2026 | Instalação sem Python nem git, com o Chromium no pacote; sanções do TCU no navegador do servidor |
 
 | Marco | Incrementos | Situação |
 |---|---|---|
