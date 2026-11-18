@@ -2,7 +2,7 @@
 
 ## Versões atendidas
 
-Só a versão mais recente recebe correções de segurança. As versões publicadas estão em [Releases](https://github.com/maia-andre/licita_certidoes/releases).
+Só a versão mais recente recebe correções de segurança. As versões publicadas estão em [Releases](https://github.com/maia-andre/certidoes-do-fornecedor/releases).
 
 ## Como relatar uma vulnerabilidade
 

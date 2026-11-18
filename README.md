@@ -2,14 +2,14 @@
 
 # 📑 Certidões do Fornecedor
 
-*licita_certidoes*
+*certidoes-do-fornecedor*
 
 **Digite o CNPJ, resolva só o captcha e tenha as certidões do fornecedor em mãos.**
 
 Programa local e gratuito para pregoeiros, gestores e fiscais de contratos.
 
-[![Testes](https://github.com/maia-andre/licita_certidoes/actions/workflows/testes.yml/badge.svg)](https://github.com/maia-andre/licita_certidoes/actions/workflows/testes.yml)
-[![Versão](https://img.shields.io/github/v/release/maia-andre/licita_certidoes?label=vers%C3%A3o&color=blue)](https://github.com/maia-andre/licita_certidoes/releases)
+[![Testes](https://github.com/maia-andre/certidoes-do-fornecedor/actions/workflows/testes.yml/badge.svg)](https://github.com/maia-andre/certidoes-do-fornecedor/actions/workflows/testes.yml)
+[![Versão](https://img.shields.io/github/v/release/maia-andre/certidoes-do-fornecedor?label=vers%C3%A3o&color=blue)](https://github.com/maia-andre/certidoes-do-fornecedor/releases)
 [![Licença](https://img.shields.io/badge/licen%C3%A7a-AGPL%203.0-A42E2B)](LICENSE)
 ![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-Chromium-2EAD33?logo=playwright&logoColor=white)
@@ -125,10 +125,10 @@ O que falta, o que impede e um caminho possível para cada exigência. Nenhum de
 | Exigência | O que impede hoje | Caminho possível |
 |---|---|---|
 | **CND estadual (ICMS)**<br/>SP: Certidão Única do SIDEB | "Emitir eCND" leva ao login gov.br. O programa não automatiza gov.br. | Modo navegador do servidor: o servidor entra no gov.br no próprio navegador, e o programa só recolhe o PDF. Depende de o login do servidor permitir emitir para o CNPJ de terceiro. |
-| **CND estadual**<br/>outras UFs | Cada estado tem um portal próprio; em alguns, Fazenda e dívida ativa saem em certidões separadas. | Mapeamento colaborativo na issue [#7](https://github.com/maia-andre/licita_certidoes/issues/7): o programa usa a UF do CNPJ para abrir o portal certo, no modo que cada um aceitar. |
+| **CND estadual**<br/>outras UFs | Cada estado tem um portal próprio; em alguns, Fazenda e dívida ativa saem em certidões separadas. | Mapeamento colaborativo na issue [#7](https://github.com/maia-andre/certidoes-do-fornecedor/issues/7): o programa usa a UF do CNPJ para abrir o portal certo, no modo que cada um aceitar. |
 | **Complemento cível**<br/>eproc/TJSP | O pedido exige gov.br nível ouro ou prata. | O servidor faz o pedido no próprio navegador, com o gov.br dele. A página de download (número do pedido e CNPJ) é aberta e poderia ser consultada pelo programa, como já se faz no e-SAJ. |
 | **CND municipal (ISS)**<br/>São José dos Campos | O sistema tributário migrou em 11/2026 para o iiTributário, que ainda não oferece a CND mobiliária. | O iiTributário tem, em outros municípios, uma consulta pública por CNPJ e motivo do pedido que gera o PDF. Quando estiver disponível em SJC, deve caber no modo automatizado ou no navegador do servidor. |
-| **CND municipal**<br/>outros municípios | Cada prefeitura tem um portal próprio. | Um catálogo de portais municipais, mapeado com a ajuda de colaboradores de cada município na issue [#6](https://github.com/maia-andre/licita_certidoes/issues/6): o programa usa o município da sede (BrasilAPI) para abrir o portal certo, no modo que cada um aceitar. |
+| **CND municipal**<br/>outros municípios | Cada prefeitura tem um portal próprio. | Um catálogo de portais municipais, mapeado com a ajuda de colaboradores de cada município na issue [#6](https://github.com/maia-andre/certidoes-do-fornecedor/issues/6): o programa usa o município da sede (BrasilAPI) para abrir o portal certo, no modo que cada um aceitar. |
 | **Inscrição no CNPJ** | Os dados já vêm da BrasilAPI, mas o comprovante oficial é da Receita, com captcha. | Modo navegador do servidor, como a CND federal. |
 | **Inscrição estadual** | Não foi feito reconhecimento. | Verificar a consulta pública do Cadesp/Sintegra. Se tiver captcha, modo navegador do servidor. |
 | **Inscrição municipal** | Cada prefeitura tem a sua. | O mesmo catálogo da CND municipal. |
@@ -142,9 +142,12 @@ O que falta, o que impede e um caminho possível para cada exigência. Nenhum de
 
 Para usar o programa sem instalar Python nem git:
 
-1. Baixe o zip `certidoes-do-fornecedor-<versão>-windows.zip` da [release mais recente](https://github.com/maia-andre/licita_certidoes/releases/latest).
+1. Baixe o zip `certidoes-do-fornecedor-<versão>-windows.zip` da [release mais recente](https://github.com/maia-andre/certidoes-do-fornecedor/releases/latest).
 2. Extraia a pasta `Certidoes do Fornecedor` onde preferir, por exemplo em Documentos.
 3. Abra `Certidoes do Fornecedor.exe`.
+
+> [!WARNING]
+> O executável não tem assinatura digital de código. Na primeira execução, o Windows pode mostrar o aviso "O Windows protegeu o computador" (SmartScreen); para seguir, clique em **Mais informações** e depois em **Executar assim mesmo**. Alguns antivírus também desconfiam de programas empacotados com PyInstaller. Se a TI do seu órgão bloquear o executável, ela pode conferir o código e o pacote neste repositório, montar o próprio pacote com o `empacotar.py` ou rodar o programa pelo código-fonte, como na seção seguinte. Baixe o zip só da página de [Releases](https://github.com/maia-andre/certidoes-do-fornecedor/releases) deste repositório.
 
 O Chromium usado nos portais já vem dentro da pasta. As certidões ficam em `Certidoes`, na pasta do usuário.
 
@@ -161,8 +164,8 @@ A pasta e o zip ficam em `dist\`.
 Testado no Windows 11 com Python 3.14. A tela usa o WebView2 do Edge, que já vem com o sistema.
 
 ```powershell
-git clone https://github.com/maia-andre/licita_certidoes.git
-cd licita_certidoes
+git clone https://github.com/maia-andre/certidoes-do-fornecedor.git
+cd certidoes-do-fornecedor
 
 py -m venv .venv
 .venv\Scripts\python -m pip install -r requirements.txt
@@ -200,7 +203,7 @@ sudo apt install python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.1
 
 ## Versões e marcos
 
-As notas de cada versão estão em [Releases](https://github.com/maia-andre/licita_certidoes/releases), e o andamento de cada marco, com as issues pendentes, em [Milestones](https://github.com/maia-andre/licita_certidoes/milestones).
+As notas de cada versão estão em [Releases](https://github.com/maia-andre/certidoes-do-fornecedor/releases), e o andamento de cada marco, com as issues pendentes, em [Milestones](https://github.com/maia-andre/certidoes-do-fornecedor/milestones).
 
 | Versão | Data | Conteúdo |
 |---|---|---|
@@ -243,8 +246,8 @@ As notas de cada versão estão em [Releases](https://github.com/maia-andre/lici
 
 O programa nasceu para a rotina de uma prefeitura, mas a dor é a mesma em qualquer órgão que contrata pela Lei 14.133/2021. As certidões federais servem a todos; o que muda de um lugar para outro são os **portais estadual e municipal** e a **lista de exigências padrão** de cada órgão. Essas coisas se mapeiam muito mais rápido em conjunto.
 
-- **CND municipal do seu município:** formulário [CND municipal do meu município](https://github.com/maia-andre/licita_certidoes/issues/new?template=cnd-municipal.yml), com andamento na issue [#6](https://github.com/maia-andre/licita_certidoes/issues/6).
-- **CND estadual do seu estado:** formulário [CND estadual do meu estado](https://github.com/maia-andre/licita_certidoes/issues/new?template=cnd-estadual.yml), com andamento na issue [#7](https://github.com/maia-andre/licita_certidoes/issues/7).
+- **CND municipal do seu município:** formulário [CND municipal do meu município](https://github.com/maia-andre/certidoes-do-fornecedor/issues/new?template=cnd-municipal.yml), com andamento na issue [#6](https://github.com/maia-andre/certidoes-do-fornecedor/issues/6).
+- **CND estadual do seu estado:** formulário [CND estadual do meu estado](https://github.com/maia-andre/certidoes-do-fornecedor/issues/new?template=cnd-estadual.yml), com andamento na issue [#7](https://github.com/maia-andre/certidoes-do-fornecedor/issues/7).
 - **Exigências, erros e código:** veja o [guia de contribuição](CONTRIBUTING.md), com as regras que todo portal novo precisa seguir.
 
 Ao participar, você concorda com o [Código de Conduta](CODE_OF_CONDUCT.md). Vulnerabilidades seguem a [política de segurança](SECURITY.md).
@@ -259,7 +262,7 @@ Ao participar, você concorda com o [Código de Conduta](CODE_OF_CONDUCT.md). Vu
 
 **André Maia** ([@maia-andre](https://github.com/maia-andre)), Prefeitura de São José dos Campos.
 
-Dúvidas e propostas pelas [issues](https://github.com/maia-andre/licita_certidoes/issues); assuntos que não cabem numa issue pública, pelo e-mail andre.maia@sjc.sp.gov.br. O projeto não tem suporte formal, e as respostas podem levar alguns dias.
+Dúvidas e propostas pelas [issues](https://github.com/maia-andre/certidoes-do-fornecedor/issues); assuntos que não cabem numa issue pública, pelo e-mail andre.maia@sjc.sp.gov.br. O projeto não tem suporte formal, e as respostas podem levar alguns dias.
 
 ## Aviso
 

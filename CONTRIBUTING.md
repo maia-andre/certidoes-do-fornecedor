@@ -10,9 +10,9 @@ Ao participar, você concorda em seguir o [Código de Conduta](CODE_OF_CONDUCT.m
 
 | Contribuição | Onde |
 |---|---|
-| Portal da CND municipal do seu município | Formulário [CND municipal do meu município](https://github.com/maia-andre/licita_certidoes/issues/new?template=cnd-municipal.yml). Andamento na issue [#6](https://github.com/maia-andre/licita_certidoes/issues/6). |
-| Portal da CND estadual do seu estado | Formulário [CND estadual do meu estado](https://github.com/maia-andre/licita_certidoes/issues/new?template=cnd-estadual.yml). Andamento na issue [#7](https://github.com/maia-andre/licita_certidoes/issues/7). |
-| Exigência de habilitação que não está na tabela do README | Uma [issue](https://github.com/maia-andre/licita_certidoes/issues/new) com a exigência, o tipo de edital em que aparece e o portal que a emite. |
+| Portal da CND municipal do seu município | Formulário [CND municipal do meu município](https://github.com/maia-andre/certidoes-do-fornecedor/issues/new?template=cnd-municipal.yml). Andamento na issue [#6](https://github.com/maia-andre/certidoes-do-fornecedor/issues/6). |
+| Portal da CND estadual do seu estado | Formulário [CND estadual do meu estado](https://github.com/maia-andre/certidoes-do-fornecedor/issues/new?template=cnd-estadual.yml). Andamento na issue [#7](https://github.com/maia-andre/certidoes-do-fornecedor/issues/7). |
+| Exigência de habilitação que não está na tabela do README | Uma [issue](https://github.com/maia-andre/certidoes-do-fornecedor/issues/new) com a exigência, o tipo de edital em que aparece e o portal que a emite. |
 | Situação ou validade lida errado | Uma issue com o tipo de certidão, o que a tela mostrou e o que o PDF diz. |
 | Erro do programa | Uma issue com os passos para reproduzir, o sistema operacional e a mensagem que apareceu. |
 
@@ -73,7 +73,7 @@ O projeto é licenciado sob a [AGPL 3.0](LICENSE). Ao enviar uma contribuição,
 
 ## Contato
 
-- Dúvidas e propostas: [issues](https://github.com/maia-andre/licita_certidoes/issues).
+- Dúvidas e propostas: [issues](https://github.com/maia-andre/certidoes-do-fornecedor/issues).
 - Assuntos que não cabem numa issue pública: andre.maia@sjc.sp.gov.br.
 - Vulnerabilidades: siga a [política de segurança](SECURITY.md).
 

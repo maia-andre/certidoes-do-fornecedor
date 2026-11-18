@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Obrigado por ajudar a mapear as CNDs municipais! Cada município tem um portal próprio, e é isso que permite ao `licita_certidoes` abrir o portal certo a partir da sede do fornecedor.
+        Obrigado por ajudar a mapear as CNDs municipais! Cada município tem um portal próprio, e é isso que permite ao programa abrir o portal certo a partir da sede do fornecedor.
 
         Não é preciso emitir a certidão: basta abrir o portal e descrever o que aparece.
   - type: input
