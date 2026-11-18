@@ -136,6 +136,14 @@ O que falta, o que impede e um caminho possível para cada exigência. Nenhum de
 | **CREA/CAU** | Só nas concorrências de engenharia; não foi feito reconhecimento. | Verificar as consultas públicas de registro de empresa dos conselhos. |
 | **Alvarás e licenças** | Dependem do objeto e do órgão emissor. | Fica fora: o servidor confere o documento apresentado pelo fornecedor. |
 
+## Inteligência artificial
+
+O programa não usa inteligência artificial. A identificação da empresa, a leitura da situação e da validade nos PDFs e a montagem da capa seguem regras explícitas no código, cobertas pelos testes automatizados. Quando uma regra não reconhece o documento, a tela mostra "Conferir no PDF". Nenhum dado vai para serviço de IA.
+
+A IA generativa foi usada no desenvolvimento, como apoio na escrita do código, dos testes e da documentação. O mantenedor revisou e aprovou cada mudança, e o comportamento é conferido pela suíte de testes e pela validação com CNPJs reais.
+
+Por enquanto não há aplicação de IA prevista dentro do programa. Se surgir uma, ela passa pela especificação como qualquer outra mudança e segue os princípios acima: processamento local e nenhum serviço externo.
+
 ## Como rodar
 
 ### Executável para Windows
