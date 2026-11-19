@@ -108,6 +108,23 @@ def ler_certidao_unica_sp(texto: str) -> Leitura:
     return Leitura(_situacao_pelo_titulo(titulo), validade)
 
 
+_SITUACAO_CDT_MG = re.compile(
+    r"CERTIDAO DE DEBITOS TRIBUTARIOS (POSITIVA COM EFEITOS? DE NEGATIVA|NEGATIVA|POSITIVA) DATA DE EMISSAO")
+_SITUACOES = {"NEGATIVA": NEGATIVA, "POSITIVA": POSITIVA}
+
+
+def ler_cdt_mg(texto: str) -> Leitura:
+    """Certidão de Débitos Tributários de MG: a situação vem logo após o título, e a validade é impressa."""
+    t = normalizar(texto)
+    if "SECRETARIA DE ESTADO DE FAZENDA DE MINAS GERAIS" not in t:
+        return Leitura()
+    achado = _SITUACAO_CDT_MG.search(t)
+    if not achado:
+        return Leitura()
+    situacao = _SITUACOES.get(achado.group(1), POSITIVA_EFEITO_NEGATIVA)
+    return Leitura(situacao, _data_unica(t, r"DATA DE VALIDADE " + _DATA))
+
+
 _MESES = ("JANEIRO", "FEVEREIRO", "MARCO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO",
           "NOVEMBRO", "DEZEMBRO")
 _DATA_EXTENSO = re.compile(r"\b(\d{1,2}) DE (" + "|".join(_MESES) + r") DE (\d{4})\b")

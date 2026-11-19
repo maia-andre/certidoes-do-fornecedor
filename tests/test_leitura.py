@@ -4,7 +4,7 @@ import datetime as dt
 import pytest
 
 from certidoes import leitura as lt
-from tests.conftest import SIDEB_NEGATIVA
+from tests.conftest import CDT_MG_NEGATIVA, SIDEB_NEGATIVA
 
 CNPJ = "11222333000181"
 
@@ -364,3 +364,27 @@ def test_certidao_unica_sp_nao_le_outro_documento():
 def test_raiz_solta_so_conta_depois_de_cnpj_e_sem_o_resto_do_numero():
     assert lt.cnpj_confere("CNPJ: 11.222.333 matriz e filiais", CNPJ)
     assert not lt.cnpj_confere("Processo 11.222.333", CNPJ)
+
+
+CDT_MG = "\n".join(CDT_MG_NEGATIVA)
+
+
+def test_cdt_mg_negativa_com_validade_impressa():
+    assert lt.ler(lt.ler_cdt_mg, CDT_MG, CNPJ) == lt.Leitura(lt.NEGATIVA, dt.date(2027, 2, 17))
+
+
+def test_cdt_mg_confere_pela_raiz_e_vale_para_filial():
+    assert lt.ler(lt.ler_cdt_mg, CDT_MG, "11222333000262").situacao == lt.NEGATIVA
+    assert lt.ler(lt.ler_cdt_mg, CDT_MG, "99888777000166") == lt.Leitura()
+
+
+def test_cdt_mg_positiva_e_positiva_com_efeitos_de_negativa():
+    positiva = CDT_MG.replace("\nNegativa\n", "\nPositiva\n")
+    efeitos = CDT_MG.replace("\nNegativa\n", "\nPositiva com efeitos de Negativa\n")
+    assert lt.ler_cdt_mg(positiva).situacao == lt.POSITIVA
+    assert lt.ler_cdt_mg(efeitos).situacao == lt.POSITIVA_EFEITO_NEGATIVA
+
+
+def test_cdt_mg_com_situacao_desconhecida_ou_outro_documento_pede_conferencia():
+    assert lt.ler_cdt_mg(CDT_MG.replace("\nNegativa\n", "\nEm analise\n")) == lt.Leitura()
+    assert lt.ler_cdt_mg(_sideb()) == lt.Leitura()

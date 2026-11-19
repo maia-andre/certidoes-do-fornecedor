@@ -9,7 +9,7 @@ from typing import Callable
 from certidoes import leitura
 from certidoes.cnpj import formatar
 from certidoes.pdf import texto_do_pdf
-from certidoes.portais import caixa, cnj, esaj, receita, sideb, tcesp, tcu, tst
+from certidoes.portais import caixa, cdt_mg, cnj, esaj, receita, sideb, tcesp, tcu, tst
 from certidoes.portais.comum import NaoEmitida, Pedido, PortalErro, Pulada, SinalServidor
 
 AGUARDANDO = "Aguardando"
@@ -50,11 +50,41 @@ class Item:
     fora_da_uf: str = ""  # mensagem de "Não se aplica"; aceita {uf}
     # Com "matriz" em `precisa`, filial é consultada pelo CNPJ da matriz (RN-07); esta mensagem aceita {matriz}.
     aviso_matriz: str = ""
+    # Item com um portal por UF (CND estadual, RN-12): cada variante tem a mesma chave e o próprio `uf`.
+    por_uf: tuple = ()
 
 
 def aplica(item: Item, uf: str | None) -> bool:
-    """O item vale para o CNPJ da UF informada (REQ-04). Sem UF conhecida, vale."""
+    """O item vale para o CNPJ da UF informada (REQ-04). Sem UF conhecida, vale, salvo item por UF."""
+    if item.por_uf:
+        return uf is not None and any(variante.uf == uf.upper() for variante in item.por_uf)
     return item.uf is None or uf is None or uf.upper() == item.uf
+
+
+def para_uf(item: Item, uf: str | None) -> Item:
+    """A variante do item para a UF do CNPJ, quando o item tem um portal por UF; senão, o próprio item."""
+    for variante in item.por_uf:
+        if uf is not None and variante.uf == uf.upper():
+            return variante
+    return item
+
+
+def _sem_portal(cnpj, **_):
+    raise PortalErro("Não há portal mapeado para a UF deste CNPJ.")
+
+
+NOME_ESTADUAL = "CND estadual"
+CND_ESTADUAL = Item(
+    "estadual", NOME_ESTADUAL, "Fazenda da UF", _sem_portal, "", NAVEGADOR,
+    fora_da_uf="CNPJ de {uf}: a CND estadual de {uf} ainda não está no programa. Obtenha-a no portal da Fazenda "
+               "de {uf}. Para ajudar a incluí-la: https://github.com/maia-andre/certidoes-do-fornecedor/issues/7",
+    por_uf=(
+        Item("estadual", NOME_ESTADUAL, "SIDEB (SP)", sideb.obter_certidao, sideb.INSTRUCAO, NAVEGADOR,
+             leitura.ler_certidao_unica_sp, uf="SP"),
+        Item("estadual", NOME_ESTADUAL, "CDT (MG)", cdt_mg.obter_certidao, cdt_mg.INSTRUCAO, NAVEGADOR,
+             leitura.ler_cdt_mg, uf="MG"),
+    ),
+)
 
 
 # Ordem da RN-01. Adiados (RN-10): eproc (item 6) e CND de SJC (item 9).
@@ -63,10 +93,7 @@ ITENS = (
          precisa=("matriz",), aviso_matriz=receita.AVISO_MATRIZ),
     Item("crf", "CRF FGTS", "Caixa", caixa.obter_crf, caixa.INSTRUCAO, NAVEGADOR, leitura.ler_crf),
     Item("cndt", "CNDT", "TST", tst.obter_cndt, tst.INSTRUCAO, AUTOMATIZADO, leitura.ler_cndt),
-    Item("estadual", "Certidão Única estadual", "SIDEB", sideb.obter_certidao, sideb.INSTRUCAO, NAVEGADOR,
-         leitura.ler_certidao_unica_sp, uf="SP",
-         fora_da_uf="CNPJ de {uf}: o SIDEB só emite a certidão estadual de SP. Obtenha a CND estadual no portal "
-                    "da Fazenda de {uf}."),
+    CND_ESTADUAL,
     Item("falencia", "Falência, concordatas e recuperações", "e-SAJ/TJSP", esaj.obter_pedido_falencia,
          esaj.INSTRUCAO, AUTOMATIZADO, leitura.ler_falencia, precisa=("razao_social", "email", "avisar"), uf="SP",
          fora_da_uf="CNPJ de {uf}: o e-SAJ do TJSP não emite esta certidão. Peça-a ao distribuidor do Tribunal de "
@@ -109,7 +136,7 @@ class Execucao:
     def __init__(self, itens, cnpj, hoje=dt.date.today, dados=None, uf=None, pasta_consulta=None,
                  relogio=dt.datetime.now):
         """`pasta_consulta`: subpasta desta consulta (REQ-08); cada PDF obtido é movido para ela."""
-        self._itens = tuple(itens)
+        self._itens = tuple(para_uf(item, uf) for item in itens)  # portal da UF do CNPJ (RN-12)
         self._pasta_consulta = pathlib.Path(pasta_consulta) if pasta_consulta else None
         self._relogio = relogio
         self.inicio = relogio()

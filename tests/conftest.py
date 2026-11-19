@@ -202,6 +202,27 @@ SIDEB_NEGATIVA = (
     "Folha 1 de 1",
 )
 
+# Certidão de Débitos Tributários de MG (CDT): texto do PDF real de 19/11/2026, em ASCII, com CNPJ fictício.
+CDT_MG_NEGATIVA = (
+    "SECRETARIA DE ESTADO DE FAZENDA DE MINAS GERAIS",
+    "Certidao de Debitos Tributarios",
+    "Negativa",
+    "Data de emissao", "19/11/2026",
+    "Data de validade", "17/02/2027",
+    "Razao Social", "EMPRESA EXEMPLO LTDA",
+    "CNPJ", "11.222.333/0001-81",
+    "Ressalvado o direito de a Fazenda Publica Estadual cobrar e inscrever quaisquer dividas de responsabilidade "
+    "do sujeito passivo acima",
+    "identificado que vierem a ser apuradas, e certificado que:",
+    "1. Nao constam debitos relativos a tributos administrados pela Fazenda Publica Estadual e/ou Advocacia Geral "
+    "do Estado;",
+    "Certidao valida para todos os estabelecimentos da empresa, alcancando debitos tributarios do sujeito passivo "
+    "em Fase Administrativa ou",
+    "inscritos em Divida Ativa.",
+    "Codigo de controle de autenticidade", "9022-7490-B15C-6C3D-7041-ECA4-7DE4-1D26",
+    "Pagina 1 de 1",
+)
+
 # Certidões do CNIA (CNJ): a negativa segue o texto real de 12/11/2026, em ASCII, com CNPJ fictício.
 CNJ_NEGATIVA = (
     "Certidao Negativa",
