@@ -100,8 +100,14 @@ Itens da spec: RNF-07
 Depende de: INC-10
 Entrega verificável: num Windows sem Python, o servidor extrai o zip, abre `Certidoes do Fornecedor.exe` e faz uma consulta completa, com o Chromium do pacote e a capa em PDF.
 
+### INC-17 — CND estadual por UF e portal de MG
+Status: concluído (2026-11-19)
+Itens da spec: RN-12
+Depende de: INC-06
+Entrega verificável: um CNPJ de MG obtém a certidão pelo CDT, com situação e validade lidas; um CNPJ de SP continua no SIDEB; um CNPJ de outra UF fica "Não se aplica", com o link do mapeamento.
+
 ## Cobertura
-Cada REQ, RNF, RN e CE da spec aparece em exatamente um incremento: REQ-01 a REQ-21, RNF-01 a RNF-07, RN-01 a RN-09 e RN-11, e CE-01 a CE-15. A RN-10 registra os adiamentos e a RN-12, o mapeamento colaborativo; nenhuma das duas tem incremento próprio.
+Cada REQ, RNF, RN e CE da spec aparece em exatamente um incremento: REQ-01 a REQ-21, RNF-01 a RNF-07, RN-01 a RN-09 e RN-11, e CE-01 a CE-15. A RN-10 registra os adiamentos. A RN-12, o mapeamento colaborativo, ganha um incremento a cada portal que entra no programa: o primeiro é o INC-17 (MG).
 
 O INC-02 antecipa o maior risco técnico (hCaptcha em navegador automatizado). Se a Receita ou a Caixa recusarem o navegador, o plano deve ser revisto antes de seguir.
 
@@ -142,3 +148,4 @@ O INC-02 antecipa o maior risco técnico (hCaptcha em navegador automatizado). S
 - **2026-11-17 — Executável para Windows (INC-16).** O executável entrou no escopo (spec 1.15, RNF-07): `empacotar.py` monta com o PyInstaller a pasta `Certidoes do Fornecedor`, com o Chromium do Playwright dentro do pacote, e o zip para a release. Teste assistido com um CNPJ real: as 7 certidões e a capa saíram pelo executável.
 - **2026-11-17 — TCU no navegador do servidor.** No primeiro teste do executável, o firewall do TCU recusou a consulta direta ("Requisição rejeitada", suporte ID extB); o mesmo pedido fora do executável teve a mesma resposta, e a página abriu normalmente no navegador do servidor. O item 7 passou ao modo navegador do servidor, com o PDF reconhecido pelo texto e pelo CNPJ (spec 1.16).
 - **2026-11-19 — Certidão Única estadual retomada (INC-06).** Teste do servidor no próprio navegador: entrou com o gov.br em "Emitir eCND", e o SIDEB emitiu a certidão de um CNPJ de terceiro, pedindo só a raiz (8 dígitos). O primeiro CNPJ tentado tinha débito, e o portal não emitiu, mandando a empresa regularizar. O PDF traz a data de emissão e "Validade 90 dias, contados da data de sua expedição"; por decisão do servidor, a tela mostra a emissão mais 90 dias (RN-04). Decisão: item 4 no modo navegador do servidor, só para CNPJ de SP, com a raiz na área de transferência e "Falha técnica" fora do horário do SIDEB (spec 1.17). Teste assistido com 5 CNPJs: duas certidões negativas (uma de matriz e uma de filial, reconhecidas pela raiz) lidas com validade de 90 dias; duas empresas com débito, sem certidão emitida; e um CNPJ do RJ, com "Não se aplica".
+- **2026-11-19 — CND estadual de MG pelo fluxo de issue e PR (INC-17).** Primeiro portal que segue o caminho do CONTRIBUTING: formulário (issue #8), avaliação na issue, branch e pull request. O CDT exige gov.br, como o SIDEB; no teste do servidor, emitiu a certidão de um CNPJ de terceiro sem débito, com situação e validade impressas. Decisão do servidor: o item 4 passa a "CND estadual", com o portal escolhido pela UF do CNPJ, para a tela não ganhar uma linha por estado (spec 1.18). O RJ foi mapeado na issue #9, mas o portal mostrava a emissão "temporariamente bloqueada".

@@ -3,7 +3,7 @@ import pathlib
 
 from certidoes import leitura
 from certidoes import sequencia as seq
-from certidoes.portais import cnj, esaj, receita, sideb, tcesp, tcu
+from certidoes.portais import cdt_mg, cnj, esaj, receita, sideb, tcesp, tcu
 from certidoes.portais.comum import NaoEmitida, Pedido, PortalErro
 from tests.conftest import pdf_com_texto
 
@@ -264,10 +264,10 @@ def test_item_nao_obtido_fica_sem_situacao_e_validade():
 
 
 def test_itens_reais_tem_leitor():
-    assert [i.ler for i in seq.ITENS] == [leitura.ler_cnd, leitura.ler_crf, leitura.ler_cndt,
-                                          leitura.ler_certidao_unica_sp, leitura.ler_falencia,
-                                          leitura.ler_sancoes_tcu, leitura.ler_improbidade_cnj,
-                                          leitura.ler_apenados_tcesp]
+    # A CND estadual lê pela variante da UF (test_cnd_estadual_tem_um_portal_por_uf).
+    assert [i.ler for i in seq.ITENS] == [leitura.ler_cnd, leitura.ler_crf, leitura.ler_cndt, None,
+                                          leitura.ler_falencia, leitura.ler_sancoes_tcu,
+                                          leitura.ler_improbidade_cnj, leitura.ler_apenados_tcesp]
 
 
 def espera_ate_pular(execucao_ref, chave):
@@ -567,16 +567,58 @@ def test_item_da_mesma_uf_ou_sem_uf_conhecida_e_consultado():
         assert execucao.itens()[0]["estado"] == "Obtida"
 
 
-def test_so_a_certidao_estadual_e_a_falencia_dependem_da_uf():
-    assert {i.chave: i.uf for i in seq.ITENS if i.uf} == {"estadual": "SP", "falencia": "SP"}
-    itens = {i.chave: i for i in seq.ITENS}
-    assert "art. 69, II" in itens["falencia"].fora_da_uf.format(uf="MG")
-    assert "Fazenda de MG" in itens["estadual"].fora_da_uf.format(uf="MG")
+def test_so_a_falencia_e_a_cnd_estadual_dependem_da_uf():
+    assert {i.chave: i.uf for i in seq.ITENS if i.uf} == {"falencia": "SP"}
+    assert [i.chave for i in seq.ITENS if i.por_uf] == ["estadual"]
+    assert "art. 69, II" in {i.chave: i for i in seq.ITENS}["falencia"].fora_da_uf.format(uf="MG")
 
 
-def test_certidao_estadual_vem_do_sideb_no_navegador_do_servidor_e_mostra_a_raiz():
-    estadual = {i.chave: i for i in seq.ITENS}["estadual"]
-    assert (estadual.obter, estadual.precisa) == (sideb.obter_certidao, ())
+def test_cnd_estadual_tem_um_portal_por_uf():
+    variantes = {v.uf: v for v in seq.CND_ESTADUAL.por_uf}
+    assert set(variantes) == {"SP", "MG"}
+    assert (variantes["SP"].obter, variantes["SP"].ler) == (sideb.obter_certidao, leitura.ler_certidao_unica_sp)
+    assert (variantes["MG"].obter, variantes["MG"].ler) == (cdt_mg.obter_certidao, leitura.ler_cdt_mg)
+    assert {(v.chave, v.nome, v.modo) for v in variantes.values()} == {("estadual", "CND estadual", seq.NAVEGADOR)}
+
+
+def test_cnd_estadual_abre_o_portal_da_uf_do_cnpj():
+    for uf, portal in (("SP", "SIDEB (SP)"), ("mg", "CDT (MG)")):
+        estadual = {i["chave"]: i for i in seq.Execucao(seq.ITENS, CNPJ, uf=uf).itens()}["estadual"]
+        assert (estadual["portal"], estadual["estado"]) == (portal, seq.AGUARDANDO)
+
+
+def test_cnd_estadual_de_uf_nao_mapeada_nao_se_aplica_e_aponta_o_mapeamento():
+    estadual = {i["chave"]: i for i in seq.Execucao(seq.ITENS, CNPJ, uf="RJ").itens()}["estadual"]
+    assert estadual["estado"] == seq.NAO_SE_APLICA
+    assert estadual["mensagem"].startswith("CNPJ de RJ: a CND estadual de RJ ainda não está no programa.")
+    assert estadual["mensagem"].endswith("/issues/7")
+
+
+def test_cnd_estadual_de_mg_copia_o_cnpj_completo():
+    mg = {v.uf: v for v in seq.CND_ESTADUAL.por_uf}["MG"]
+    copiados, instrucoes = [], []
+
+    def obter(cnpj, ao_aguardar, sinal):
+        copiados.append(cnpj)
+        ao_aguardar()
+        return pathlib.Path("/tmp/estadual.pdf")
+
+    execucao = seq.Execucao([seq.Item("estadual", "E", "CDT", obter, mg.instrucao, seq.NAVEGADOR)], "11222333000262")
+    original = execucao._marcar
+
+    def marcar(chave, estado, mensagem="", arquivo=None):
+        if estado == seq.AGUARDANDO_SERVIDOR:
+            instrucoes.append(mensagem)
+        original(chave, estado, mensagem, arquivo)
+
+    execucao._marcar = marcar
+    execucao.rodar()
+    assert copiados == ["11222333000262"]
+    assert 'clique em "Empresa", cole o CNPJ 11.222.333/0002-62 (Ctrl+V)' in instrucoes[0]
+
+
+def test_cnd_estadual_de_sp_mostra_a_raiz():
+    estadual = {v.uf: v for v in seq.CND_ESTADUAL.por_uf}["SP"]
     copiados, instrucoes = [], []
 
     def obter(cnpj, ao_aguardar, sinal):

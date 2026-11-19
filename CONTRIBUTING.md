@@ -30,7 +30,7 @@ Para mapear um portal, não é preciso emitir a certidão: basta abrir o portal 
    .venv\Scripts\python -m pytest -q
    ```
 
-4. Abra o pull request descrevendo o que mudou e como você testou. O GitHub Actions roda a suíte no Windows a cada pull request.
+4. Abra o pull request descrevendo o que mudou e como você testou; o modelo do pull request traz a lista do que conferir. O GitHub Actions roda a suíte no Windows a cada pull request.
 
 ## Regras do projeto
 
