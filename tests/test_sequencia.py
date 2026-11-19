@@ -3,7 +3,7 @@ import pathlib
 
 from certidoes import leitura
 from certidoes import sequencia as seq
-from certidoes.portais import cnj, esaj, receita, tcesp, tcu
+from certidoes.portais import cnj, esaj, receita, sideb, tcesp, tcu
 from certidoes.portais.comum import NaoEmitida, Pedido, PortalErro
 from tests.conftest import pdf_com_texto
 
@@ -23,8 +23,8 @@ def obtem(caminho):
 
 def test_itens_seguem_a_ordem_da_rn01_com_o_modo_de_cada_portal():
     assert [(i.chave, i.modo) for i in seq.ITENS] == [
-        ("cnd", seq.NAVEGADOR), ("crf", seq.NAVEGADOR), ("cndt", seq.AUTOMATIZADO), ("falencia", seq.AUTOMATIZADO),
-        ("sancoes", seq.NAVEGADOR), ("improbidade", seq.DIRETO), ("apenados", seq.NAVEGADOR)]
+        ("cnd", seq.NAVEGADOR), ("crf", seq.NAVEGADOR), ("cndt", seq.AUTOMATIZADO), ("estadual", seq.NAVEGADOR),
+        ("falencia", seq.AUTOMATIZADO), ("sancoes", seq.NAVEGADOR), ("improbidade", seq.DIRETO), ("apenados", seq.NAVEGADOR)]
 
 
 def test_sancoes_vem_do_tcu_sem_dados_extras():
@@ -264,7 +264,8 @@ def test_item_nao_obtido_fica_sem_situacao_e_validade():
 
 
 def test_itens_reais_tem_leitor():
-    assert [i.ler for i in seq.ITENS] == [leitura.ler_cnd, leitura.ler_crf, leitura.ler_cndt, leitura.ler_falencia,
+    assert [i.ler for i in seq.ITENS] == [leitura.ler_cnd, leitura.ler_crf, leitura.ler_cndt,
+                                          leitura.ler_certidao_unica_sp, leitura.ler_falencia,
                                           leitura.ler_sancoes_tcu, leitura.ler_improbidade_cnj,
                                           leitura.ler_apenados_tcesp]
 
@@ -566,10 +567,36 @@ def test_item_da_mesma_uf_ou_sem_uf_conhecida_e_consultado():
         assert execucao.itens()[0]["estado"] == "Obtida"
 
 
-def test_so_a_falencia_depende_da_uf_e_aponta_o_tribunal_da_sede():
-    assert {i.chave: i.uf for i in seq.ITENS if i.uf} == {"falencia": "SP"}
-    falencia = {i.chave: i for i in seq.ITENS}["falencia"]
-    assert "art. 69, II" in falencia.fora_da_uf.format(uf="MG")
+def test_so_a_certidao_estadual_e_a_falencia_dependem_da_uf():
+    assert {i.chave: i.uf for i in seq.ITENS if i.uf} == {"estadual": "SP", "falencia": "SP"}
+    itens = {i.chave: i for i in seq.ITENS}
+    assert "art. 69, II" in itens["falencia"].fora_da_uf.format(uf="MG")
+    assert "Fazenda de MG" in itens["estadual"].fora_da_uf.format(uf="MG")
+
+
+def test_certidao_estadual_vem_do_sideb_no_navegador_do_servidor_e_mostra_a_raiz():
+    estadual = {i.chave: i for i in seq.ITENS}["estadual"]
+    assert (estadual.obter, estadual.precisa) == (sideb.obter_certidao, ())
+    copiados, instrucoes = [], []
+
+    def obter(cnpj, ao_aguardar, sinal):
+        copiados.append(cnpj)
+        ao_aguardar()
+        return pathlib.Path("/tmp/estadual.pdf")
+
+    execucao = seq.Execucao([seq.Item("estadual", "E", "SIDEB", obter, estadual.instrucao, seq.NAVEGADOR)],
+                            "11222333000262")
+    original = execucao._marcar
+
+    def marcar(chave, estado, mensagem="", arquivo=None):
+        if estado == seq.AGUARDANDO_SERVIDOR:
+            instrucoes.append(mensagem)
+        original(chave, estado, mensagem, arquivo)
+
+    execucao._marcar = marcar
+    execucao.rodar()
+    assert copiados == ["11222333000262"]
+    assert "cole a raiz do CNPJ 11.222.333 (Ctrl+V)" in instrucoes[0]
 
 
 def _execucao_cnd(dados, copiados):

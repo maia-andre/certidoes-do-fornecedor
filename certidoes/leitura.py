@@ -1,6 +1,7 @@
 """Situação e validade lidas do texto do PDF (REQ-10, RN-03, RN-04).
 
-Regra geral: na dúvida, "Conferir no PDF". O programa nunca presume situação nem calcula prazo.
+Regra geral: na dúvida, "Conferir no PDF". O programa nunca presume situação nem calcula prazo padrão; a única
+conta é a da Certidão Única de SP, que imprime o prazo em dias e a data de emissão (RN-04).
 """
 import dataclasses
 import datetime as dt
@@ -16,6 +17,8 @@ NADA_CONSTA = "Nada consta"
 
 _DATA = r"(\d{2}/\d{2}/\d{4})"
 _CNPJ_NO_TEXTO = re.compile(r"([0-9A-Z]{2})\.?([0-9A-Z]{3})\.?([0-9A-Z]{3})/[0-9A-Z]{4}-?\d{2}")
+# Só a raiz, como na Certidão Única de SP ("CNPJ: 60.870.847"), que vale para a matriz e as filiais.
+_RAIZ_NO_TEXTO = re.compile(r"\bCNPJ: ([0-9A-Z]{2})\.([0-9A-Z]{3})\.([0-9A-Z]{3})(?![/0-9A-Z])")
 
 
 @dataclasses.dataclass(frozen=True)
@@ -63,8 +66,10 @@ def _situacao_pelo_titulo(titulo: str) -> str:
 
 
 def cnpj_confere(texto: str, cnpj: str) -> bool:
-    """True se algum CNPJ do texto tem a mesma raiz (8 primeiros caracteres) do CNPJ consultado."""
-    return any("".join(m.groups()) == cnpj[:8] for m in _CNPJ_NO_TEXTO.finditer(normalizar(texto)))
+    """True se algum CNPJ do texto, completo ou só a raiz, tem a raiz (8 primeiros caracteres) do consultado."""
+    t = normalizar(texto)
+    return any("".join(m.groups()) == cnpj[:8] for padrao in (_CNPJ_NO_TEXTO, _RAIZ_NO_TEXTO)
+               for m in padrao.finditer(t))
 
 
 def ler_cnd(texto: str) -> Leitura:
@@ -89,6 +94,18 @@ def ler_crf(texto: str) -> Leitura:
         return Leitura()
     situacao = REGULAR if "ENCONTRA-SE EM SITUACAO REGULAR" in t else CONFERIR
     return Leitura(situacao, _data_unica(t, r"VALIDADE: \d{2}/\d{2}/\d{4} A " + _DATA))
+
+
+def ler_certidao_unica_sp(texto: str) -> Leitura:
+    """Certidão Única do SIDEB (RN-08): a validade é a emissão mais o prazo em dias impresso (RN-04)."""
+    t = normalizar(texto)
+    titulo = _titulo(t)
+    if "TRIBUTOS ESTADUAIS E A DIVIDA ATIVA DO ESTADO DE SAO PAULO" not in titulo:
+        return Leitura()
+    emissao = _data_unica(t, r"DATA E HORA DA EMISSAO " + _DATA)
+    prazo = set(re.findall(r"VALIDADE (\d{1,3}) DIAS, CONTADOS DA DATA DE SUA EXPEDICAO", t))
+    validade = emissao + dt.timedelta(days=int(prazo.pop())) if emissao and len(prazo) == 1 else None
+    return Leitura(_situacao_pelo_titulo(titulo), validade)
 
 
 _MESES = ("JANEIRO", "FEVEREIRO", "MARCO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO",

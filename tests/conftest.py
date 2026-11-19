@@ -181,6 +181,27 @@ TCESP_CERTIDAO = (
 )
 
 
+# Certidão Única estadual de SP (SIDEB): texto do PDF real de 19/11/2026, em ASCII, com CNPJ fictício.
+SIDEB_NEGATIVA = (
+    "Secretaria da Fazenda e Planejamento e", "Procuradoria Geral do Estado de Sao Paulo",
+    "CERTIDAO NEGATIVA DE DEBITOS RELATIVOS AOS TRIBUTOS ESTADUAIS E A DIVIDA ATIVA DO ESTADO",
+    "DE SAO PAULO",
+    "CNPJ: 11.222.333",
+    "Ressalvado o direito de a Fazenda do Estado de Sao Paulo cobrar e inscrever quaisquer dividas de "
+    "responsabilidade do",
+    "sujeito passivo acima identificado que vierem a ser apuradas, e certificado que nao constam pendencias em "
+    "seu nome,",
+    "Esta certidao e valida para o estabelecimento matriz e suas filiais e se refere a situacao do sujeito "
+    "passivo no ambito da",
+    "SFP e da PGE.",
+    "Certidao emitida gratuitamente com base na Resolucao Conjunta SFP/PGE no 1, de 11/09/2026.",
+    "Certidao no DDF825079F203",
+    "Data e hora da emissao 19/11/2026 14:07:00",
+    "Validade 90 dias, contados da data de sua expedicao.",
+    "Qualquer rasura ou emenda invalidara este documento.",
+    "Folha 1 de 1",
+)
+
 # Certidões do CNIA (CNJ): a negativa segue o texto real de 12/11/2026, em ASCII, com CNPJ fictício.
 CNJ_NEGATIVA = (
     "Certidao Negativa",

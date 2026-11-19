@@ -4,6 +4,7 @@ import datetime as dt
 import pytest
 
 from certidoes import leitura as lt
+from tests.conftest import SIDEB_NEGATIVA
 
 CNPJ = "11222333000181"
 
@@ -328,3 +329,38 @@ def test_improbidade_cnj_sem_certidao_negativa_pede_conferencia():
 def test_improbidade_cnj_de_outro_cnpj_ou_outro_documento_nao_e_lida():
     assert lt.ler(lt.ler_improbidade_cnj, CNJ_REAL, "99888777000166") == lt.Leitura()
     assert lt.ler_improbidade_cnj(CNDT_NEGATIVA) == lt.Leitura()
+
+
+def _sideb():
+    return "\n".join(SIDEB_NEGATIVA)
+
+
+def test_certidao_unica_sp_negativa_vale_90_dias_da_emissao():
+    assert lt.ler(lt.ler_certidao_unica_sp, _sideb(), CNPJ) == lt.Leitura(lt.NEGATIVA, dt.date(2027, 2, 17))
+
+
+def test_certidao_unica_sp_confere_pela_raiz_e_vale_para_filial():
+    assert lt.ler(lt.ler_certidao_unica_sp, _sideb(), "11222333000262").situacao == lt.NEGATIVA
+    assert lt.ler(lt.ler_certidao_unica_sp, _sideb(), "99888777000166") == lt.Leitura()
+
+
+def test_certidao_unica_sp_positiva_com_efeitos_de_negativa():
+    texto = _sideb().replace("CERTIDAO NEGATIVA DE DEBITOS",
+                             "CERTIDAO POSITIVA COM EFEITOS DE NEGATIVA DE DEBITOS")
+    assert lt.ler_certidao_unica_sp(texto).situacao == lt.POSITIVA_EFEITO_NEGATIVA
+
+
+def test_certidao_unica_sp_sem_prazo_ou_emissao_pede_conferencia_da_validade():
+    sem_prazo = _sideb().replace("Validade 90 dias", "Validade conforme portaria")
+    sem_emissao = _sideb().replace("Data e hora da emissao 19/11/2026", "Data e hora da emissao")
+    assert lt.ler_certidao_unica_sp(sem_prazo) == lt.Leitura(lt.NEGATIVA, None)
+    assert lt.ler_certidao_unica_sp(sem_emissao) == lt.Leitura(lt.NEGATIVA, None)
+
+
+def test_certidao_unica_sp_nao_le_outro_documento():
+    assert lt.ler_certidao_unica_sp(CNDT_NEGATIVA) == lt.Leitura()
+
+
+def test_raiz_solta_so_conta_depois_de_cnpj_e_sem_o_resto_do_numero():
+    assert lt.cnpj_confere("CNPJ: 11.222.333 matriz e filiais", CNPJ)
+    assert not lt.cnpj_confere("Processo 11.222.333", CNPJ)

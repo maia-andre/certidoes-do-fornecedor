@@ -9,7 +9,7 @@ from typing import Callable
 from certidoes import leitura
 from certidoes.cnpj import formatar
 from certidoes.pdf import texto_do_pdf
-from certidoes.portais import caixa, cnj, esaj, receita, tcesp, tcu, tst
+from certidoes.portais import caixa, cnj, esaj, receita, sideb, tcesp, tcu, tst
 from certidoes.portais.comum import NaoEmitida, Pedido, PortalErro, Pulada, SinalServidor
 
 AGUARDANDO = "Aguardando"
@@ -40,7 +40,7 @@ class Item:
     portal: str
     obter: Callable  # obter(cnpj, ao_aguardar=..., sinal=SinalServidor, **dados) -> Path | Pedido;
     #                  levanta PortalErro/NaoEmitida/Pulada
-    instrucao: str  # texto mostrado em "Aguardando servidor"; aceita {cnpj}
+    instrucao: str  # texto mostrado em "Aguardando servidor"; aceita {cnpj} e {raiz} (8 primeiros dígitos)
     modo: str = AUTOMATIZADO
     ler: Callable | None = None  # ler(texto) -> leitura.Leitura
     # Dados da consulta repassados a obter(), p. ex. ("razao_social", "email"). "avisar" é especial:
@@ -57,12 +57,16 @@ def aplica(item: Item, uf: str | None) -> bool:
     return item.uf is None or uf is None or uf.upper() == item.uf
 
 
-# Ordem da RN-01. Adiados (RN-10): Certidão Única estadual (item 4), eproc (item 6) e CND de SJC (item 9).
+# Ordem da RN-01. Adiados (RN-10): eproc (item 6) e CND de SJC (item 9).
 ITENS = (
     Item("cnd", "CND federal", "Receita Federal", receita.obter_cnd, receita.INSTRUCAO, NAVEGADOR, leitura.ler_cnd,
          precisa=("matriz",), aviso_matriz=receita.AVISO_MATRIZ),
     Item("crf", "CRF FGTS", "Caixa", caixa.obter_crf, caixa.INSTRUCAO, NAVEGADOR, leitura.ler_crf),
     Item("cndt", "CNDT", "TST", tst.obter_cndt, tst.INSTRUCAO, AUTOMATIZADO, leitura.ler_cndt),
+    Item("estadual", "Certidão Única estadual", "SIDEB", sideb.obter_certidao, sideb.INSTRUCAO, NAVEGADOR,
+         leitura.ler_certidao_unica_sp, uf="SP",
+         fora_da_uf="CNPJ de {uf}: o SIDEB só emite a certidão estadual de SP. Obtenha a CND estadual no portal "
+                    "da Fazenda de {uf}."),
     Item("falencia", "Falência, concordatas e recuperações", "e-SAJ/TJSP", esaj.obter_pedido_falencia,
          esaj.INSTRUCAO, AUTOMATIZADO, leitura.ler_falencia, precisa=("razao_social", "email", "avisar"), uf="SP",
          fora_da_uf="CNPJ de {uf}: o e-SAJ do TJSP não emite esta certidão. Peça-a ao distribuidor do Tribunal de "
@@ -185,7 +189,8 @@ class Execucao:
         self._marcar(item.chave, EM_ANDAMENTO)
         matriz = self._dados.get("matriz") if "matriz" in item.precisa else None
         aviso_matriz = item.aviso_matriz.format(matriz=formatar(matriz)) if matriz else ""
-        instrucao = " ".join(filter(None, [item.instrucao.format(cnpj=formatar(matriz or self._cnpj)), aviso_matriz]))
+        texto = item.instrucao.format(cnpj=formatar(matriz or self._cnpj), raiz=formatar(self._cnpj)[:10])
+        instrucao = " ".join(filter(None, [texto, aviso_matriz]))
         try:
             extras = {nome: self._dados.get(nome) for nome in item.precisa if nome != "avisar"}
             if "avisar" in item.precisa:

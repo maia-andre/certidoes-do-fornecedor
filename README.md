@@ -36,23 +36,24 @@ O Certidões do Fornecedor cuida da parte repetitiva e deixa com o servidor o qu
 
 ## Certidões disponíveis
 
-Sete certidões em sequência, numa só tela, com o estado de cada uma atualizado durante a consulta.
+Oito certidões em sequência, numa só tela, com o estado de cada uma atualizado durante a consulta.
 
 | # | Certidão | Portal | Modo de acesso | Captcha | O que a tela mostra |
 |:-:|---|---|---|---|---|
 | 1 | CND federal (Receita/PGFN) | Receita Federal | Navegador do servidor | hCaptcha | Situação e validade |
 | 2 | CRF FGTS | Caixa | Navegador do servidor | sim | Situação (Regular) e validade |
 | 3 | CNDT | TST | Automatizado | imagem | Situação e validade |
+| 4 | Certidão Única estadual (SP) | SIDEB (Sefaz-SP/PGE-SP) | Navegador do servidor, com o gov.br do servidor | gov.br | Situação e validade (emissão + 90 dias) |
 | 5 | Falência, concordatas e recuperações | e-SAJ/TJSP | Automatizado | reCAPTCHA | "Nada consta" e data de emissão, ou "Pedido feito: acompanhar" |
 | 7 | Sanções: CEIS, CNEP e inidôneos do TCU | Consulta Consolidada (TCU) | Navegador do servidor | nenhum | Resultado de cada cadastro e data da consulta |
 | 10 | Improbidade administrativa (CNIA) | CNJ | Consulta direta | nenhum | "Nada consta" e data da consulta |
 | 8 | Apenados do TCE-SP | Sistema de Apenados (TCE-SP) | Navegador do servidor | Turnstile | "Nada consta" e data da consulta |
 
-A numeração segue a lista da [especificação](docs/spec.md) (RN-01). Os itens 4, 6 e 9 estão [adiados](#caminho-para-as-demais-exigências).
+A numeração segue a lista da [especificação](docs/spec.md) (RN-01). Os itens 6 e 9 estão [adiados](#caminho-para-as-demais-exigências).
 
 Em todas elas, o programa:
 
-- atende CNPJ de qualquer UF; a certidão cujo portal só atende SP (hoje, a falência pelo e-SAJ) fica "Não se aplica" fora de SP, com a indicação de onde obtê-la;
+- atende CNPJ de qualquer UF; a certidão cujo portal só atende SP (hoje, a Certidão Única estadual e a falência pelo e-SAJ) fica "Não se aplica" fora de SP, com a indicação de onde obtê-la;
 - valida o CNPJ, numérico ou alfanumérico, antes de qualquer consulta externa, e identifica a empresa na BrasilAPI, com a escolha entre filial e matriz; para filial, pede a CND federal com o CNPJ da matriz, que a Receita exige, e o CRF com o da filial;
 - guarda os PDFs numa subpasta por consulta, `Certidoes\<CNPJ>\<data e hora>\` (no Windows, dentro de `C:\Users\<usuário>\`), e abre cada PDF e a pasta pela tela;
 - lê do PDF a situação e a validade e avisa quando a certidão está vencida; na dúvida, mostra **"Conferir no PDF"** e nunca presume;
@@ -111,7 +112,7 @@ Ponto de partida: as minutas padrão de edital de 2026 da Prefeitura de São Jos
 | CNEP (CGU), consulta do pregoeiro | todas | Disponível (item 7, pelo TCU) |
 | Relação de Apenados do TCE-SP, consulta do pregoeiro | todas | Disponível (item 8) |
 | CND municipal (ISS) da sede | todas, menos uma de aquisição de bens | Adiada (item 9, SJC) |
-| CND estadual (ICMS) | todas, menos transporte | Adiada (item 4, gov.br) |
+| CND estadual (ICMS) | todas, menos transporte | Disponível para SP (item 4, SIDEB) |
 | Inscrição no CNPJ | todas | Parcial: só os dados, pela BrasilAPI |
 | Inscrição estadual ou municipal | todas | Fora do escopo atual |
 | Certidão simplificada da Junta (ME/EPP) | todas | Fora do escopo (a JUCESP cobra pela certidão) |
@@ -124,7 +125,6 @@ O que falta, o que impede e um caminho possível para cada exigência. Nenhum de
 
 | Exigência | O que impede hoje | Caminho possível |
 |---|---|---|
-| **CND estadual (ICMS)**<br/>SP: Certidão Única do SIDEB | "Emitir eCND" leva ao login gov.br. O programa não automatiza gov.br. | Modo navegador do servidor: o servidor entra no gov.br no próprio navegador, e o programa só recolhe o PDF. Depende de o login do servidor permitir emitir para o CNPJ de terceiro. |
 | **CND estadual**<br/>outras UFs | Cada estado tem um portal próprio; em alguns, Fazenda e dívida ativa saem em certidões separadas. | Mapeamento colaborativo na issue [#7](https://github.com/maia-andre/certidoes-do-fornecedor/issues/7): o programa usa a UF do CNPJ para abrir o portal certo, no modo que cada um aceitar. |
 | **Complemento cível**<br/>eproc/TJSP | O pedido exige gov.br nível ouro ou prata. | O servidor faz o pedido no próprio navegador, com o gov.br dele. A página de download (número do pedido e CNPJ) é aberta e poderia ser consultada pelo programa, como já se faz no e-SAJ. |
 | **CND municipal (ISS)**<br/>São José dos Campos | O sistema tributário migrou em 11/2026 para o iiTributário, que ainda não oferece a CND mobiliária. | O iiTributário tem, em outros municípios, uma consulta pública por CNPJ e motivo do pedido que gera o PDF. Quando estiver disponível em SJC, deve caber no modo automatizado ou no navegador do servidor. |
@@ -225,7 +225,7 @@ As notas de cada versão estão em [Releases](https://github.com/maia-andre/cert
 | **1 · Fluxo básico** | INC-01 a INC-05 e INC-07 | Concluído em 11/11/2026 |
 | **2 · Certidões das minutas** | INC-08, INC-11 e INC-12 | Concluído em 12/11/2026 |
 | **3 · Validação e tela** | INC-10, INC-14 e INC-15 | Concluído em 12/11/2026 (release v0.3.0) |
-| **4 · Certidões com login** | INC-06 (SIDEB), INC-09 (eproc) e INC-13 (CND de SJC) | Adiado: gov.br e sistema municipal em implantação |
+| **4 · Certidões com login** | INC-06 (SIDEB), INC-09 (eproc) e INC-13 (CND de SJC) | Em andamento: SIDEB pronto; eproc e CND de SJC adiados |
 
 <details>
 <summary><b>Todos os incrementos</b></summary>
@@ -237,7 +237,7 @@ As notas de cada versão estão em [Releases](https://github.com/maia-andre/cert
 | 03 | CRF FGTS | CRF obtido ou "Não emitida" com a mensagem do portal | Concluído |
 | 04 | Situação e validade na tela | Dados lidos do PDF, ou "Conferir no PDF" | Concluído |
 | 05 | Identificação da empresa | Dados da BrasilAPI e escolha entre filial e matriz | Concluído |
-| 06 | Certidão Única estadual | Emissão pelo SIDEB | Adiado: exige login gov.br |
+| 06 | Certidão Única estadual | Emissão pelo SIDEB, com o gov.br do servidor | Concluído |
 | 07 | Pular e repetir itens | Refazer só o item que falhou | Concluído |
 | 08 | Falência no e-SAJ | Pedido enviado e certidão baixada, se já liberada | Concluído |
 | 09 | Complemento no eproc | Pedido com gov.br | Adiado: exige login gov.br |

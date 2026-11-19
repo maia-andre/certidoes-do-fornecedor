@@ -35,7 +35,7 @@ Depende de: INC-04
 Entrega verificável: a tela mostra os dados da empresa, pede a escolha em caso de filial e recusa um CNPJ fora de SP sem abrir nenhum portal.
 
 ### INC-06 — Certidão Única estadual no SIDEB
-Status: adiado (2026-11-11) — o SIDEB exige login gov.br para emitir (spec 1.4, RN-10)
+Status: concluído (2026-11-19) — modo navegador do servidor, com o gov.br do servidor (spec 1.17)
 Itens da spec: RN-08 | CE-07
 Depende de: INC-05
 Entrega verificável: um CNPJ real de SP obtém a Certidão Única pelo SIDEB, e fora do horário do sistema o item mostra "Falha técnica" com essa explicação.
@@ -141,3 +141,4 @@ O INC-02 antecipa o maior risco técnico (hCaptcha em navegador automatizado). S
 - **2026-11-12 — TCU sem navegador.** A página do TCU busca o resultado e o PDF numa API pública (`/api/rest/publico/certidoes/<CNPJ>`, com `Accept: application/pdf`). Pedir o PDF direto, sem Chromium, é mais simples e leve. Novo modo "consulta direta" na RN-09. No Windows da prefeitura, a consulta passa pelo proxy configurado no sistema, como a da BrasilAPI.
 - **2026-11-17 — Executável para Windows (INC-16).** O executável entrou no escopo (spec 1.15, RNF-07): `empacotar.py` monta com o PyInstaller a pasta `Certidoes do Fornecedor`, com o Chromium do Playwright dentro do pacote, e o zip para a release. Teste assistido com um CNPJ real: as 7 certidões e a capa saíram pelo executável.
 - **2026-11-17 — TCU no navegador do servidor.** No primeiro teste do executável, o firewall do TCU recusou a consulta direta ("Requisição rejeitada", suporte ID extB); o mesmo pedido fora do executável teve a mesma resposta, e a página abriu normalmente no navegador do servidor. O item 7 passou ao modo navegador do servidor, com o PDF reconhecido pelo texto e pelo CNPJ (spec 1.16).
+- **2026-11-19 — Certidão Única estadual retomada (INC-06).** Teste do servidor no próprio navegador: entrou com o gov.br em "Emitir eCND", e o SIDEB emitiu a certidão de um CNPJ de terceiro, pedindo só a raiz (8 dígitos). O primeiro CNPJ tentado tinha débito, e o portal não emitiu, mandando a empresa regularizar. O PDF traz a data de emissão e "Validade 90 dias, contados da data de sua expedição"; por decisão do servidor, a tela mostra a emissão mais 90 dias (RN-04). Decisão: item 4 no modo navegador do servidor, só para CNPJ de SP, com a raiz na área de transferência e "Falha técnica" fora do horário do SIDEB (spec 1.17). Teste assistido com 5 CNPJs: duas certidões negativas (uma de matriz e uma de filial, reconhecidas pela raiz) lidas com validade de 90 dias; duas empresas com débito, sem certidão emitida; e um CNPJ do RJ, com "Não se aplica".
