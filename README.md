@@ -219,6 +219,7 @@ As notas de cada versão estão em [Releases](https://github.com/maia-andre/cert
 | **v0.2.0** · Certidões das minutas | 12/11/2026 | Falência no e-SAJ, sanções pelo TCU e apenados do TCE-SP |
 | **v0.3.0** · Validada, com tela nova e capa | 12/11/2026 | Validação com 10 CNPJs reais e correções; improbidade no CNJ; CNPJ de qualquer UF; CND de filial pela matriz; tela revisada; subpasta por consulta e capa em PDF |
 | **v1.0.0** · Executável para Windows | 17/11/2026 | Instalação sem Python nem git, com o Chromium no pacote; sanções do TCU no navegador do servidor |
+| **v1.1.0** · Certidão Única estadual | 19/11/2026 | Certidão Única de SP pelo SIDEB, com o gov.br do servidor, e validade de 90 dias da emissão |
 
 | Marco | Incrementos | Situação |
 |---|---|---|
